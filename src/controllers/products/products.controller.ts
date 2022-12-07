@@ -12,36 +12,37 @@ import {
   Res,
 } from '@nestjs/common';
 import { Response } from 'express';
+import { ProductsService } from 'src/services/products/products.service';
+import { ParseIntPipe } from 'src/common/parse-int/parse-int.pipe';
+import { CreateProductDto } from 'src/dtos/products.dto';
 
 @Controller('products')
 export class ProductsController {
+  constructor(private productsService: ProductsService) {}
+
   @Get(':id')
   @HttpCode(HttpStatus.OK)
-  getProduct(@Res() response: Response, @Param('id') productId: string) {
-    response.status(200).send({
-      message: `Producto con el id: ${productId}`,
-    });
+  getProduct(@Param('id', ParseIntPipe) id: number) {
+    return this.productsService.findOne(id);
   }
 
-  @Get('/')
+  @Get('')
   getProducts(@Query('limit') limit = '100', @Query('offset') offset = '50') {
-    return `Products limit:${limit} and offset: ${offset}`;
+    return this.productsService.findAll();
   }
 
   @Post()
-  create(@Body() payload) {
-    return {
-      message: 'Action to create',
-      payload,
-    };
+  create(@Body() payload: CreateProductDto) {
+    // return {
+    //   message: 'Action to create',
+    //   payload,
+    // };
+    return this.productsService.create(payload);
   }
 
   @Put(':id')
   update(@Param('id') id: number, @Body() payload: any) {
-    return {
-      id,
-      payload,
-    };
+    return this.productsService.update(+id, payload);
   }
 
   @Delete(':id')
